@@ -1,6 +1,3 @@
-
-
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
@@ -19,7 +16,6 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
-// Sample user data
 const users = [
     { id: 1, email: 'ankitraj980533@gmail.com', verified: false },
     { id: 2, email: 'tenj7981@gmail.com', verified: false }
@@ -27,7 +23,6 @@ const users = [
 
 const secretKey = 'secret';
 
-// Nodemailer configuration
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -38,21 +33,17 @@ const transporter = nodemailer.createTransport({
 
 
 
-// Endpoint to request a magic link
 app.post('/login/magic-link', (req, res) => {
     const { email } = req.body;
     
 
-    // Check if the email exists
     const user = users.find(user => user.email === email);
     if (!user) {
         return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Generate a token
     const token = jwt.sign({ email }, secretKey, { expiresIn: '2h' });
 
-    // Send the magic link to the user's email
     const magicLink = `http://localhost:3000/login?token=${token}`;
     const mailOptions = {
         from: 'temjing3@gmail.com',
@@ -72,12 +63,10 @@ app.post('/login/magic-link', (req, res) => {
     });
 });
 
-// Endpoint to handle login
 app.get('/login', (req, res) => {
     const token = req.query.token;
    
 
-    // Verify the token
     jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
             console.log(err);
@@ -92,10 +81,9 @@ app.get('/login', (req, res) => {
                 return res.status(404).json({ message: 'User not found.' });
             }
 
-            // Update user's verification status
             user.verified = true;
             console.log("Sending test message through socket...");
-            // io.emit('verificationSuccess', { userEmail, token });
+
             io.to(userEmail).emit('verificationSuccess', { userEmail, token });
 
 
@@ -104,19 +92,15 @@ app.get('/login', (req, res) => {
     });
 });
 
-// Socket.IO event handling
 io.on('connection', socket => {
     console.log('A client connected');
 
-    // Handle event to store user's socket ID
     socket.on('storeUserSocket', email => {
         console.log(`Storing socket ID for ${email}`);
         socket.join(email);
-        // Store user's socket ID or perform any necessary operations
     });
 });
 
-// Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
