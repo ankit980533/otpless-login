@@ -1,0 +1,130 @@
+<!-- <!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <div id="message"></div>
+    <form id="loginForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        <button type="submit">Send Magic Link</button>
+    </form>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <!-- <script src="/socket.io/socket.io.js"></scri> -->
+    <!-- <script>
+        const serverURL = 'http://localhost:3000';
+        
+                document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    const email = formData.get('email');
+console.log(email);
+    fetch(`${serverURL}/login/magic-link`,{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.text();
+        }
+        throw new Error('Failed to request magic link.');
+    })
+    .then(data => {
+        alert(data); 
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+});
+
+    
+        const socket = io(serverURL);
+        socket.on('verificationSuccess', function(data) {
+            console.log("reee");
+            console.log(data);
+            console.log('Verification successful for email:', data.userEmail);
+            console.log('Token:', data.token);
+            console.log("fbhdsbklsdcbww1223423");
+            if (data.token) {
+                console.log("fbhdsbklsdcbww");
+                    window.location.href = 'https://digiqc.com'; 
+                }
+        });
+    </script> -->
+<!-- </body>
+</html> --> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <div id="message"></div>
+    <form id="loginForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        <button type="submit">Send Magic Link</button>
+    </form>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+        const serverURL = 'http://localhost:3000';
+        const socket = io(serverURL);
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const email = formData.get('email');
+
+            fetch(`${serverURL}/login/magic-link`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Failed to request magic link.');
+            })
+            .then(data => {
+                alert(data); 
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+
+            // Emit email to the server after form submission
+            socket.emit('storeUserSocket', email);
+        });
+
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
+
+        socket.on('verificationSuccess', function(data) {
+            console.log('Verification successful for email:', data.userEmail);
+            console.log('Token:', data.token);
+            if (data.token) {
+                window.location.href = `hello.html?userEmail=${data.userEmail}&token=${data.token}`;// Redirect to success page
+            }
+        });
+    </script>
+</body>
+</html>
