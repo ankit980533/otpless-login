@@ -12,7 +12,7 @@ const path = require('path');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
-require('dotenv').config().
+require('dotenv').config();
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
