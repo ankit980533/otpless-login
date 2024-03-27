@@ -35,14 +35,14 @@ const transporter = nodemailer.createTransport({
 
 app.post('/login/magic-link', (req, res) => {
     const { email } = req.body;
-    
-
+    const {sessionId}=req.body;
+console.log(email + sessionId);
     const user = users.find(user => user.email === email);
     if (!user) {
         return res.status(404).json({ message: 'User not found.' });
     }
 
-    const token = jwt.sign({ email }, secretKey, { expiresIn: '2h' });
+    const token = jwt.sign({ email ,sessionId}, secretKey, { expiresIn: '2h' });
 
     const magicLink = `http://localhost:3000/login?token=${token}`;
     const mailOptions = {
@@ -74,7 +74,7 @@ app.get('/login', (req, res) => {
         } else {
             console.log(decoded);
             const userEmail = decoded.email;
-          
+          const sessionId=decoded.sessionId;
             const user = users.find(user => user.email === userEmail);
             if (!user) {
                 console.log("user not found")
@@ -84,7 +84,7 @@ app.get('/login', (req, res) => {
             user.verified = true;
             console.log("Sending test message through socket...");
 
-            io.to(userEmail).emit('verificationSuccess', { userEmail, token });
+            io.to(userEmail).emit('verificationSuccess', { userEmail, token,sessionId });
 
 
             res.send('Login successful!');
@@ -97,6 +97,7 @@ io.on('connection', socket => {
 
     socket.on('storeUserSocket', email => {
         console.log(`Storing socket ID for ${email}`);
+        // clientSocketId = socket.id;
         socket.join(email);
     });
 });

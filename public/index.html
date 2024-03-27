@@ -63,7 +63,7 @@ console.log(email);
 <!-- </body>
 </html> --> -->
 
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -83,7 +83,13 @@ console.log(email);
     <script>
         const serverURL = 'http://localhost:3000';
         const socket = io(serverURL);
+        let sessionId = sessionStorage.getItem('sessionId'); // Retrieve session ID from sessionStorage
 
+// If sessionId is null, generate a new sessionId and store it in sessionStorage
+if (!sessionId) {
+    sessionId = generateSessionId(); // Implement generateSessionId() function according to your requirements
+    sessionStorage.setItem('sessionId', sessionId);
+}
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const formData = new FormData(this);
@@ -94,7 +100,7 @@ console.log(email);
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ email ,sessionId})
             })
             .then(response => {
                 if (response.ok) {
@@ -121,10 +127,94 @@ console.log(email);
         socket.on('verificationSuccess', function(data) {
             console.log('Verification successful for email:', data.userEmail);
             console.log('Token:', data.token);
-            if (data.token) {
+            if (data.token && data.sessionId===sessionId) {
                 window.location.href = `hello.html?userEmail=${data.userEmail}&token=${data.token}`;// Redirect to success page
             }
+            function generateSessionId() {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
         });
     </script>
 </body>
+</html> -->
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+</head>
+<body>
+    <h1>Login Form</h1>
+    <form id="loginForm">
+        <label for="email">email:</label><br>
+        <input type="email" id="mobile" name="email" required><br><br>
+        <button type="submit">Send Magic Link via Email</button>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+           let sessionId = sessionStorage.getItem('sessionId'); // Retrieve session ID from sessionStorage
+
+// If sessionId is null, generate a new sessionId and store it in sessionStorage
+if (!sessionId) {
+    sessionId = generateSessionId(); // Implement generateSessionId() function according to your requirements
+    sessionStorage.setItem('sessionId', sessionId);
+}
+
+
+
+        const serverURL = 'http://localhost:3000';
+        const socket = io(serverURL);
+      console.log(sessionId);
+     
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('mobile').value;
+
+            fetch(`${serverURL}/login/magic-link`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email ,sessionId})
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Failed to request magic link.');
+            })
+            .then(data => {
+                alert(data); // Display success message
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.'); // Display error message
+            });
+            socket.emit('storeUserSocket', email);
+        });
+
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
+
+        socket.on('verificationSuccess', function(data) {
+            console.log('Verification successful for email:', data.sessionId);
+            console.log('Token:', data.token);
+            if (data.token && data.sessionId===sessionId) {
+                window.location.href = `hello.html?userEmail=${data.userEmail}&token=${data.token}`;// Redirect to success page
+            }
+        });
+        function generateSessionId() {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
+    </script>
+</body>
 </html>
+
